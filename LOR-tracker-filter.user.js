@@ -140,12 +140,6 @@ for(i = 0; i < milen; i++)
 }
 GlobSettings();
 
-/*
- * Expand/collapse large (more than 6 lines) code blocks
- */
-function expandCollapseCODE(){
-
-}
 
 /*
  * sort tracker
@@ -345,78 +339,6 @@ function SortTracker(evt){ // menu's "onclick"
 	return false;
 }
 if(ichkdlen) StartSorting();
-}
-/*
- * Remove glued topics
- */
-var filtered = false;
-function goodtalks(isAll){
-}
-function rmAttInAll(){
-}
-function rmAttInTalks(){
-}
-/*
- * button "knock-knock!"
- */
-
-
-
-/*
- * Spoiler-like show/hide tags in profile
- */
-function mkSpoiler(){
-}
-
-/*
- * Remove idiot symbols of quasy-eye and so on
- */
-function idioticSymbolsRemove(){
-}
-
-/*
- * Format datetime
- */
-function ShowSecondsInDate(){
-	tlog("ShowSecondsInDate()");
-	var Tt = document.getElementsByTagName("time");
-	for(var T in Tt){
-		var A = Tt[T].attributes;
-		if(!A || !A.datetime) continue;
-		var aDate = new Date(A.datetime.value);
-		Tt[T].innerHTML = aDate.toLocaleDateString() + " " + aDate.toLocaleTimeString();
-	}
-}
-
-function SortBackwards(){
-	var comments = document.getElementsByClassName("msg");
-	var nav = $("comments");
-	var L = comments.length;
-	for(var l = L - 1; l > 0; l--)
-		nav.appendChild(comments[l]);
-}
-
-function HideSimilar(){
-	rmElement($("related-topics"));
-}
-
-/*
- * Script originally written by moscwich
- */
-function AddUserPanel(){
-}
-
-
-// *****************************************************************************
-// here - all functions that have no setup in profile
-/*
- * Allow to put html tags into user info
- */
-
-/*
- * Convert contents of tag [latex] into image from codecogs
- */
-function showLatex(){
 }
 
 }());

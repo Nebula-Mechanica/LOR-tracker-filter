@@ -191,7 +191,7 @@ function checkHref(a, tbl){ // check if topic is selected
 		if(H == menuitems[ichkd[i]]){
 			found = true; break;
 		}
-	if(!found){
+	if(found){
 		if(!addEl) rmElement(a.parentNode.parentNode);
 	}else{
 		TotalElements++;

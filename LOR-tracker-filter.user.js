@@ -89,21 +89,6 @@ function insertAfter(newElement, targetElement){
 	else
 		parent.insertBefore(newElement, targetElement.nextSibling);
 }
-// indicate that iframe content is loaded
-var iframeLoaded = false, nTries = 0;
-function iframeIsLoaded(){
-	var F = $("innerFrame");
-	if (F.src == "") return;
-	var D = (F.contentDocument) ? F.contentDocument : F.contentWindow.document;
-	if(D.getElementsByClassName("head").length == 0 && D.getElementsByClassName("menu").length == 0){
-		nTries = 100; return; // frame is blocked by AdBlock
-	}
-	iframeLoaded = true; nTries = 0;
-	tlog("IFRAME loaded " + F.src);
-}
-// alert that iframe could be blocked by adBlock
-function IFRMerror(){
-}
 /*
  *                      USERSCRIPT ITSELF
  */
@@ -149,7 +134,6 @@ tlog("addSortMenu()");
 var CurURL = getURL(true); // don't sort sorted tracker
 tlog("URL: "+CurURL);
 if(CurURL.indexOf("www.linux.org.ru/tracker") == -1) return;
-const maxElems = 50; // maximum amount of records in tracker
 var WasSorted = false; // whether tracker was sorted?
 var menuitems = ["general", "desktop", "admin", "linux-install", "development",
 				"linux-org-ru", "security", "linux-hardware", "talks", "job", "games",
@@ -179,9 +163,8 @@ function getCheckedItems(){ // save checked menu items in local storage
 	ichkdlen = ichkd.length;
 	SaveObject(ichkd, "FilterTracker");
 }
-function checkHref(a, tbl){ // check if topic is selected
+function checkHref(a){ // check if topic is selected
 	var H = a.href;
-	var addEl = (typeof(tbl) != "undefined"); // whether add needed or remove unneeded
 	if(H.charAt(H.length - 1) == "/") // cut forum name
 		H = H.slice(0,-1);
 	var slashpos = H.lastIndexOf("/");
@@ -192,11 +175,9 @@ function checkHref(a, tbl){ // check if topic is selected
 			found = true; break;
 		}
 	if(found){
-		if(!addEl) rmElement(a.parentNode.parentNode);
+		rmElement(a.parentNode.parentNode);
 	}else{
 		TotalElements++;
-		if(addEl)
-			tbl.appendChild(a.parentNode.parentNode);
 	}
 }
 function genMenuBoxes(parent){ // generate menu
@@ -245,73 +226,26 @@ function appendMenu(genmenu){ // add menu
 	for(i = 0; i < ichkdlen; i++)
 		$("MB"+ichkd[i]).checked = "true";
 }
-if(CurURL != "www.linux.org.ru/tracker"){
+if(CurURL.lastIndexOf("www.linux.org.ru/tracker") == -1){
 	appendMenu(false);
 	return;
 }
 appendMenu(true);
-// create iframe
-var innerFrame = document.createElement('iframe');
-innerFrame.id = "innerFrame";
-innerFrame.width = 0; innerFrame.height = 0; innerFrame.style.display = "none";
-document.body.appendChild(innerFrame);
-innerFrame.onload = iframeIsLoaded;
-innerFrame.src = "/tracker/?offset=50";
-function collectHrefs(doc, tbl){ // add more topics from iframe
+function collectHrefs(doc){ // add more topics from iframe
 	function chkA(A){
 		if(typeof(A) != "undefined" && typeof(A.href) != "undefined" && A.parentNode.nodeName == "TD")
-			checkHref(A, tbl);
+			checkHref(A);
 	}
 	var i, hrefs = doc.getElementsByClassName("secondary");
-	if(typeof(tbl) == "undefined")
-		for(i = hrefs.length-1; i > -1; i--){
-			if(TotalElements >= maxElems) return;
-			chkA(hrefs[i]);
-		}
-	else
-		for(i in hrefs){
-			if(TotalElements >= maxElems) return;
-			chkA(hrefs[i]);
-		}
-}
-var Wto;
-function AddMoreItems(){ // find table with topics & try to add to it more items
-	clearTimeout(Wto);
-	if(!iframeLoaded){
-		if(nTries > 10){
-			IFRMerror();
-			return;
-		}
-		nTries++;
-		Wto = setTimeout(AddMoreItems, 300);
-		return;
+	for(i = hrefs.length-1; i > -1; i--){
+		chkA(hrefs[i]);
 	}
-	mTbl = document.getElementsByClassName("message-table")[0];
-	if(typeof(mTbl) == "undefined") return;
-	var chlds = mTbl.childNodes;
-	for(var n in chlds)
-		if(chlds[n].nodeName == "TBODY"){
-			mTbl = chlds[n];
-			break;
-		}
-	var innerDoc = (innerFrame.contentDocument) ? innerFrame.contentDocument : innerFrame.contentWindow.document;
-	var hrefs = innerDoc.getElementsByClassName("secondary");
-	collectHrefs(innerDoc, mTbl);
 }
 function StartSorting(){ // Start filtering of tracker
 	var nav = document.getElementsByClassName("nav");
-	//rmElement(nav[nav.length - 1]); // remove navigation since it won't work
 	WasSorted = true;
 	TotalElements = 0;
 	collectHrefs(document);
-	if(TotalElements < 50){
-		if(!iframeLoaded){
-			nTries = 0;
-			Wto = setTimeout(AddMoreItems, 300);
-		}
-		else
-			AddMoreItems();
-	}
 }
 var oldkeyd;
 var menuwaschanged = false;
